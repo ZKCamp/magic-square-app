@@ -1,6 +1,4 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import aleoLogo from "./assets/aleo.svg";
 import "./App.css";
 import magic_square_program from "../magic_square/build/main.aleo?raw";
 import { AleoWorker } from "./workers/AleoWorker.js";
@@ -9,7 +7,13 @@ import GameBoard from "./components/GameBoard";
 
 const aleoWorker = AleoWorker();
 function App() {
-  const [count, setCount] = useState(0);
+  const [gridValues, setGridValues] = useState([
+      ['', '', ''],
+      ['', '', ''],
+      ['', '', ''],
+  ]);
+
+  const [puzzle, setPuzzle] = useState(12);
   const [account, setAccount] = useState(null);
   const [executing, setExecuting] = useState(false);
   const [deploying, setDeploying] = useState(false);
@@ -18,18 +22,6 @@ function App() {
     const key = await aleoWorker.getPrivateKey();
     setAccount(await key.to_string());
   };
-
-  async function execute() {
-    setExecuting(true);
-    const result = await aleoWorker.localProgramExecution(
-      helloworld_program,
-      "main",
-      ["5u32", "5u32"],
-    );
-    setExecuting(false);
-
-    alert(JSON.stringify(result));
-  }
 
   async function deploy() {
     setDeploying(true);
@@ -45,10 +37,54 @@ function App() {
     setDeploying(false);
   }
 
+  async function addPuzzle() {
+    try {
+      const input = puzzle.toString() + "u8";
+      console.log("Setting puzzle value to ", input);
+      const result = await aleoWorker.execute("magic_square.aleo", "add_puzzle", [input]);
+      console.log(result)
+    } catch (e) {
+      console.log(e)
+      alert("Error with deployment, please check console for details");
+    }
+  }
+
+  async function getPuzzleId(puzzleValue) {
+    const input = puzzleValue.toString() + "u8";
+    const result = await aleoWorker.executeOffline(magic_square_program, "get_puzzle_id", [input]);
+    return result[0];
+  }
+
+  async function addSolution() {
+    
+    let puzzleId = await getPuzzleId(gridValues[1][1]);
+    const goal = gridValues[1][1].toString() + "u8";
+    let solutionStr = `{r1c1: ${gridValues[0][0].toString()}u8, r1c2: ${gridValues[0][1].toString()}u8, r1c3: ${gridValues[0][2].toString()}u8, r2c1: ${gridValues[1][0].toString()}u8, r2c3: ${gridValues[1][2].toString()}u8, r3c1: ${gridValues[2][0].toString()}u8, r3c2: ${gridValues[2][1].toString()}u8, r3c3: ${gridValues[2][2].toString()}u8}`;
+
+    try {
+      const result = await aleoWorker.execute("magic_square.aleo", "add_solution", [puzzleId, goal, solutionStr]);
+      console.log(result)
+    } catch (e) {
+      console.log(e)
+      alert("Error with deployment, please check console for details");
+    }
+  }
+
   return (
     <>
-      <button onClick={deploy}>Deploy</button>
-      <GameBoard />
+      <h2>Magic Square</h2>
+      <div className="deploy-area">
+        <button onClick={deploy}>Deploy</button>
+      </div>
+
+      <div className="puzzle-area">
+        <input className="input-puzzle" type="number" value={puzzle} onChange={(e) => setPuzzle(e.target.value)}/>
+        <button onClick={addPuzzle}>Add Puzzle</button>
+      </div>
+
+      <GameBoard gridValues={gridValues} setGridValues={setGridValues} />
+      
+      <button className="solution-btn" onClick={addSolution}>Add Solution</button>
     </>
   );
 }

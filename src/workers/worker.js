@@ -9,9 +9,12 @@ import {
 } from "@aleohq/sdk";
 import { expose, proxy } from "comlink";
 
+const ENDPOINT = "http://localhost:3030";
+const PRIVATE_KEY = "APrivateKey1zkpHVhTAJiZPrDeVo6nDyvq2LDRhP2ZgECvr8zqtcefpgsc";
+
 await initThreadPool();
 
-async function localProgramExecution(program, aleoFunction, inputs) {
+async function executeOffline(program, aleoFunction, inputs) {
   const programManager = new ProgramManager();
 
   // Create a temporary account for the execution of the program
@@ -28,11 +31,13 @@ async function localProgramExecution(program, aleoFunction, inputs) {
 }
 
 async function execute(program, aleoFunction, inputs) {
-  const programManager = new ProgramManager();
+  const programManager = new ProgramManager(ENDPOINT);
 
   const account = new Account({
-    privateKey: "APrivateKey1zkpHVhTAJiZPrDeVo6nDyvq2LDRhP2ZgECvr8zqtcefpgsc",
+    privateKey: PRIVATE_KEY,
   });
+
+  console.log(account);
 
   programManager.setAccount(account);
 
@@ -40,10 +45,12 @@ async function execute(program, aleoFunction, inputs) {
     program,
     aleoFunction,
     3.0,
-    inputs,
     false,
+    inputs
   );
-  return executionResponse.getOutputs();
+
+  console.log(executionResponse);
+  return executionResponse;
 }
 
 async function getPrivateKey() {
@@ -56,18 +63,18 @@ async function deployProgram(program) {
   keyProvider.useCache(true);
 
   // Create a record provider that will be used to find records and transaction data for Aleo programs
-  const networkClient = new AleoNetworkClient("http://localhost:3030");
+  const networkClient = new AleoNetworkClient(ENDPOINT);
 
   // Use existing account with funds
   const account = new Account({
-    privateKey: "APrivateKey1zkpHVhTAJiZPrDeVo6nDyvq2LDRhP2ZgECvr8zqtcefpgsc",
+    privateKey: PRIVATE_KEY,
   });
 
   const recordProvider = new NetworkRecordProvider(account, networkClient);
 
   // Initialize a program manager to talk to the Aleo network with the configured key and record providers
   const programManager = new ProgramManager(
-    "http://localhost:3030",
+    ENDPOINT,
     keyProvider,
     recordProvider,
   );
@@ -87,5 +94,5 @@ async function deployProgram(program) {
   return tx_id;
 }
 
-const workerMethods = { localProgramExecution, getPrivateKey, deployProgram };
+const workerMethods = { executeOffline, getPrivateKey, deployProgram, execute };
 expose(workerMethods);
