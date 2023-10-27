@@ -1,90 +1,36 @@
-# React + Aleo + Leo
+# Magic Square App
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/fork/github/AleoHQ/sdk/tree/testnet3/create-aleo-app/template-react)
+## Setup
 
-This template provides a minimal setup to get React and Aleo working in Vite
-with HMR and some ESLint rules.
+* First, we need to install the correct working versions of Aleo and SnarkOS
 
-This template includes a Leo program that is loaded by the web app located in
-the `helloworld` directory.
+* Download the binary of snarkos from [here](https://github.com/AleoHQ/snarkOS/releases/tag/v2.2.1) based on your operating system. Place the binary in global path for it to be accessible globally. An example command of how to add it to path is given below:
 
-Note: Webpack is currently used for production builds due to a
-[bug](https://github.com/vitejs/vite/issues/13367) with Vite related to nested
-workers.
-
-### Start in development mode
-
-```bash
-npm run dev
+```sh
+mv snarkos /Users/shubham/.cargo/bin/snarkos
 ```
 
-Your app should be running on http://localhost:5173/
+* Download the binary of leo from [here](https://github.com/AleoHQ/leo/releases/tag/v1.10.0). Place the leo binary in the path too, similar to how it is done above.
 
-### Build Leo program
-
-1. Copy the `helloworld/.env.example` to `helloworld/.env` (this will be ignored
-   by Git):
-
-   ```bash
-   cd helloworld
-   cp .env.example .env
-   ```
-
-2. Replace `PRIVATE_KEY=user1PrivateKey` in the `.env` with your own key (you
-   can use an existing one or generate your own at https://aleo.tools/account)
-
-3. Follow instructions to install Leo here: https://github.com/AleoHQ/leo
-
-4. You can edit `helloworld/src/main.leo` and run `leo run` to compile and update the
-   Aleo instructions under `build` which are loaded by the web app.
-
-## Deploy program from web app
-
-> [!WARNING]  
-> This is for demonstration purposes or local testing only, in production applications you
-> should avoid building a public facing web app with private key information
-
-Information on generating a private key, seeding a wallet with funds, and finding a spendable record can be found here
-if you are unfamiliar: https://developer.aleo.org/testnet/getting_started/deploy_execute_demo
-
-Aleo programs deployed require unique names, make sure to edit the program's name to something unique in `helloworld/src/main.leo`, `helloworld/program.json`, rename `helloworld/inputs/helloworld.in` and rebuild.
-
-1. In the `worker.js` file modify the privateKey to be an account with available
-   funds
-
-   ```js
-   // Use existing account with funds
-   const account = new Account({
-     privateKey: "user1PrivateKey",
-   });
-   ```
-
-2. (Optional) Provide a fee record manually (located in commented code within `worker.js`)
-
-   If you do not provide a manual fee record, the SDK will attempt to scan for a record starting at the latest block. A simple way to speed this up would be to make a public transaction to this account right before deploying.
-   
-3. Run the web app and hit the deploy button
-
-## Production deployment
-
-### Build
-
-`npm run build`
-
-Upload `dist` folder to your host of choice.
-
-### ⚠️ Header warnings
-
-`DOMException: Failed to execute 'postMessage' on 'Worker': SharedArrayBuffer transfer requires self.crossOriginIsolated`
-
-If you get a warning similar to this when deploying your application, you need
-to make sure your web server is configured with the following headers:
+* Install `tmux`. For MacOS you can use the command below
 
 ```
-Cross-Origin-Opener-Policy: same-origin
-Cross-Origin-Embedder-Policy: require-corp
+brew install tmux
 ```
 
-We've included a `_headers` file that works with some web hosts (e.g. Netlify)
-but depending on your host / server setup you may need to configure the headers
-manually.
+* Download the devnet script from [here](https://github.com/AleoHQ/snarkOS/blob/testnet3/devnet.sh) and run it to start the development network.
+
+* Once you have started the network, transfer some credits to your developer account public balance. Replace the `DESTINATION_ADDRESS`.
+
+```sh
+snarkos developer execute credits.aleo transfer_private_to_public  "{  owner: aleo1rhgdu77hgyqd3xjj8ucu3jj9r2krwz6mnzyd80gncr5fxcwlh5rsvzp9px.private,  microcredits: 1000000000000u64.private,  _nonce: 2375769092384433893584628345181087640612139758569367275399070851734157235845group.public}" "DESTINATION_ADDRESS" 837500000000u64 --private-key "APrivateKey1zkp8CZNn3yeCseEtxuVPbDCwSyhGW6yZKUYKfgXmcpoGPWH" --query "http://localhost:3030" --broadcast "http://localhost:3030/testnet3/transaction/broadcast" --priority-fee 10000000000 --record "{  owner: aleo1rhgdu77hgyqd3xjj8ucu3jj9r2krwz6mnzyd80gncr5fxcwlh5rsvzp9px.private,  microcredits: 1000000000000u64.private,  _nonce: 3743508150122274933886887505116667914085733635951652042037409200808870682360group.public}"
+```
+
+## Bootstrapping
+
+* Use create-aleo-app to bootstrap a template aleo application
+
+```sh
+npm create aleo-app@latest
+```
+

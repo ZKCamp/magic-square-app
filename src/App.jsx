@@ -8,9 +8,9 @@ import GameBoard from "./components/GameBoard";
 const aleoWorker = AleoWorker();
 function App() {
   const [gridValues, setGridValues] = useState([
-      ['', '', ''],
-      ['', '', ''],
-      ['', '', ''],
+      ['1', '8', '3'],
+      ['5', '', '7'],
+      ['6', '4', '2'],
   ]);
 
   const [puzzle, setPuzzle] = useState(12);
@@ -28,7 +28,7 @@ function App() {
     try {
       const result = await aleoWorker.deployProgram(magic_square_program);
       console.log("Transaction:")
-      console.log("https://explorer.hamp.app/transaction?id=" + result)
+      console.log("http://localhost:3030/testnet3/transaction/" + result)
       alert("Transaction ID: " + result);
     } catch (e) {
       console.log(e)
