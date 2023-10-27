@@ -18,13 +18,15 @@ function App() {
   const [executing, setExecuting] = useState(false);
   const [deploying, setDeploying] = useState(false);
 
+  const [msg, setMsg] = useState("");
+
   const generateAccount = async () => {
     const key = await aleoWorker.getPrivateKey();
     setAccount(await key.to_string());
   };
 
   async function deploy() {
-    setDeploying(true);
+    setMsg("Deployment in progress..");
     try {
       const result = await aleoWorker.deployProgram(magic_square_program);
       console.log("Transaction:")
@@ -34,10 +36,12 @@ function App() {
       console.log(e)
       alert("Error with deployment, please check console for details");
     }
-    setDeploying(false);
+    setMsg("");
   }
 
   async function addPuzzle() {
+    setMsg("Adding puzzle..");
+
     try {
       const input = puzzle.toString() + "u8";
       console.log("Setting puzzle value to ", input);
@@ -47,6 +51,8 @@ function App() {
       console.log(e)
       alert("Error with deployment, please check console for details");
     }
+
+    setMsg("");
   }
 
   async function getPuzzleId(puzzleValue) {
@@ -56,7 +62,7 @@ function App() {
   }
 
   async function addSolution() {
-    
+    setMsg("Add solution..");
     let puzzleId = await getPuzzleId(gridValues[1][1]);
     const goal = gridValues[1][1].toString() + "u8";
     let solutionStr = `{r1c1: ${gridValues[0][0].toString()}u8, r1c2: ${gridValues[0][1].toString()}u8, r1c3: ${gridValues[0][2].toString()}u8, r2c1: ${gridValues[1][0].toString()}u8, r2c3: ${gridValues[1][2].toString()}u8, r3c1: ${gridValues[2][0].toString()}u8, r3c2: ${gridValues[2][1].toString()}u8, r3c3: ${gridValues[2][2].toString()}u8}`;
@@ -68,6 +74,9 @@ function App() {
       console.log(e)
       alert("Error with deployment, please check console for details");
     }
+
+    setMsg("");
+
   }
 
   return (
@@ -85,6 +94,8 @@ function App() {
       <GameBoard gridValues={gridValues} setGridValues={setGridValues} />
       
       <button className="solution-btn" onClick={addSolution}>Add Solution</button>
+      
+      <div className="msg">{msg}</div>
     </>
   );
 }
